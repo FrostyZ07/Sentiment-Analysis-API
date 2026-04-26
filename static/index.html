@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis API - Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --positive-color: #10b981;
+            --positive-glow: rgba(16, 185, 129, 0.4);
+            --negative-color: #f43f5e;
+            --negative-glow: rgba(244, 63, 94, 0.4);
+            --accent-color: #6366f1;
+            --font-body: 'Inter', sans-serif;
+            --font-display: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05), transparent 25%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 160px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        textarea::placeholder {
+            color: #475569;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-indicator.visible {
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-container {
+            display: grid;
+            gap: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+
+        .results-container.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .sentiment-main {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sentiment-main::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--current-color, transparent);
+            transition: background 0.5s ease;
+        }
+
+        .sentiment-label {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-transform: capitalize;
+            margin-bottom: 0.5rem;
+            color: var(--current-color);
+            text-shadow: 0 0 30px var(--current-glow);
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        .confidence-text {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .bars-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .bar-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bar-header.positive { color: var(--positive-color); }
+        .bar-header.negative { color: var(--negative-color); }
+
+        .bar-bg {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .bar-fill.positive { 
+            background: var(--positive-color); 
+            box-shadow: 0 0 15px var(--positive-glow);
+        }
+        
+        .bar-fill.negative { 
+            background: var(--negative-color); 
+            box-shadow: 0 0 15px var(--negative-glow);
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Ambient background blobs */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: 1;
+            opacity: 0.4;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(99, 102, 241, 0.15);
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(16, 185, 129, 0.1);
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            .glass-card { padding: 1.5rem; }
+            .sentiment-label { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="container">
+        <header>
+            <h1>Sentiment Analysis</h1>
+            <p class="subtitle">Real-time DistilBERT inference API demo</p>
+        </header>
+
+        <div class="glass-card">
+            <div class="input-wrapper">
+                <textarea id="review-input" placeholder="Start typing a review here to see real-time analysis...&#10;Try something like: 'This product is absolutely amazing!' or 'Terrible experience, would not recommend.'"></textarea>
+                <div id="status" class="status-indicator">
+                    <div class="spinner"></div> Analyzing...
+                </div>
+            </div>
+
+            <div id="results" class="results-container">
+                <div class="sentiment-main" id="sentiment-card">
+                    <div id="sentiment-label" class="sentiment-label">Neutral</div>
+                    <div id="confidence-text" class="confidence-text">Waiting for input</div>
+                </div>
+
+                <div class="bars-container">
+                    <div class="bar-wrapper">
+                        <div class="bar-header positive">
+                            <span>Positive</span>
+                            <span id="pos-pct">0%</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="pos-bar" class="bar-fill positive"></div>
+                        </div>
+                    </div>
+
+                    <div class="bar-wrapper">
+                        <div class="bar-header negative">
+                            <span>Negative</span>
+                            <span id="neg-pct">0%</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="neg-bar" class="bar-fill negative"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="meta-info">
+                    <div class="meta-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span id="time-ms">-- ms</span>
+                    </div>
+                    <div class="meta-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        <span id="model-ver">distilbert-base</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('review-input');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const sentimentLabel = document.getElementById('sentiment-label');
+        const confidenceText = document.getElementById('confidence-text');
+        const posBar = document.getElementById('pos-bar');
+        const negBar = document.getElementById('neg-bar');
+        const posPct = document.getElementById('pos-pct');
+        const negPct = document.getElementById('neg-pct');
+        const timeMs = document.getElementById('time-ms');
+        const modelVer = document.getElementById('model-ver');
+        const sentimentCard = document.getElementById('sentiment-card');
+
+        let debounceTimer;
+
+        async function analyzeText(text) {
+            if (!text.trim()) {
+                results.classList.remove('active');
+                return;
+            }
+
+            status.classList.add('visible');
+
+            try {
+                // Determine base URL dynamically (works locally and deployed)
+                const baseUrl = window.location.origin;
+                const response = await fetch(`${baseUrl}/api/v1/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        return_probabilities: true
+                    })
+                });
+
+                if (!response.ok) throw new Error('API Error');
+
+                const data = await response.json();
+                
+                // Update UI
+                results.classList.add('active');
+                
+                const isPositive = data.sentiment === 'positive';
+                const mainColor = isPositive ? 'var(--positive-color)' : 'var(--negative-color)';
+                const mainGlow = isPositive ? 'var(--positive-glow)' : 'var(--negative-glow)';
+                
+                sentimentCard.style.setProperty('--current-color', mainColor);
+                sentimentCard.style.setProperty('--current-glow', mainGlow);
+                
+                sentimentLabel.textContent = data.sentiment;
+                confidenceText.textContent = `${(data.confidence * 100).toFixed(1)}% Confidence`;
+
+                const posProb = data.probabilities.positive * 100;
+                const negProb = data.probabilities.negative * 100;
+
+                posBar.style.width = `${posProb}%`;
+                negBar.style.width = `${negProb}%`;
+                
+                posPct.textContent = `${posProb.toFixed(1)}%`;
+                negPct.textContent = `${negProb.toFixed(1)}%`;
+
+                timeMs.textContent = `${data.processing_time_ms.toFixed(1)} ms`;
+                modelVer.textContent = data.model_version;
+
+            } catch (error) {
+                console.error("Inference failed:", error);
+            } finally {
+                status.classList.remove('visible');
+            }
+        }
+
+        input.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            const text = e.target.value;
+            
+            if (text.trim().length > 0) {
+                debounceTimer = setTimeout(() => {
+                    analyzeText(text);
+                }, 400); // 400ms debounce
+            } else {
+                results.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

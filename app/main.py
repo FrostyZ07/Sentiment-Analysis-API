@@ -190,6 +190,16 @@ def create_app() -> FastAPI:
     app.include_router(jobs.router, prefix="/api/v1", tags=["Async Jobs"])
     app.include_router(keys.router, prefix="/api/v1", tags=["Authentication"])
 
+    # ── Static UI ─────────────────────────────────────────────────────
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+    
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_ui():
+        return FileResponse("static/index.html")
+
     return app
 
 
