@@ -33,6 +33,7 @@ RUN useradd -m -u 1000 appuser && \
 # Copy application source
 COPY app/ ./app/
 COPY scripts/ ./scripts/
+COPY models/ ./models/
 
 
 USER appuser

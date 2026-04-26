@@ -14,7 +14,6 @@ htmlcov/
 .coverage
 wandb/
 reports/
-models/distilbert-sentiment/
 docker-compose*.yml
 .github/
 sweeps/
