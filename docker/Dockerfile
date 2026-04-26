@@ -34,6 +34,7 @@ RUN useradd -m -u 1000 appuser && \
 COPY app/ ./app/
 COPY scripts/ ./scripts/
 COPY models/ ./models/
+COPY static/ ./static/
 
 
 USER appuser
