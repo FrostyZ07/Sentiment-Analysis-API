@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Distribution / packaging
+dist/
+*.egg-info/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Environment variables
+.env
+
+# Project specific
+models/distilbert-sentiment/
+*.pt
+*.bin
+*.safetensors
+wandb/
+reports/
+checkpoints/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

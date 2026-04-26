@@ -1,0 +1,19 @@
+program: scripts/train_sweep.py
+method: bayes
+metric:
+  name: val/f1_macro
+  goal: maximize
+parameters:
+  learning_rate:
+    distribution: log_uniform_values
+    min: 1e-5
+    max: 5e-5
+  per_device_train_batch_size:
+    values: [8, 16]
+  warmup_ratio:
+    values: [0.05, 0.1, 0.2]
+  weight_decay:
+    values: [0.0, 0.01, 0.05]
+early_terminate:
+  type: hyperband
+  min_iter: 1
