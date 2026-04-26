@@ -34,8 +34,6 @@ RUN useradd -m -u 1000 appuser && \
 COPY app/ ./app/
 COPY scripts/ ./scripts/
 
-# Model dir — populated at runtime via download_model.sh or volume mount
-VOLUME ["/app/models"]
 
 USER appuser
 
