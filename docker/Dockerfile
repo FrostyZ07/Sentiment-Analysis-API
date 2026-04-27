@@ -43,8 +43,10 @@ EXPOSE 8000
 
 # Download the fine-tuned model from Hugging Face during the build phase
 ARG HF_MODEL_ID="FrostyZ07/distilbert-sentiment-amazon"
+ARG HF_TOKEN=""
 ENV HF_MODEL_ID=${HF_MODEL_ID}
-RUN python -c "from transformers import DistilBertForSequenceClassification, DistilBertTokenizer; import os; model_id=os.environ.get('HF_MODEL_ID'); save_path='/app/models/distilbert-sentiment'; print(f'Baking {model_id} into image...'); DistilBertTokenizer.from_pretrained(model_id).save_pretrained(save_path) if True else None; DistilBertForSequenceClassification.from_pretrained(model_id).save_pretrained(save_path)" || echo "Warning: Could not download model from Hugging Face during build. Ensure HF_MODEL_ID is correct and public."
+ENV HF_TOKEN=${HF_TOKEN}
+RUN bash scripts/download_model.sh hf
 
 ENV PORT=8000 \
     MODEL_PATH=/app/models/distilbert-sentiment \
