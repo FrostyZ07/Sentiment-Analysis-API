@@ -19,8 +19,20 @@ model_id = os.environ.get('HF_MODEL_ID', 'FrostyZ07/distilbert-sentiment-amazon'
 save_path = os.environ.get('MODEL_PATH', './models/distilbert-sentiment')
 
 print(f'Downloading {model_id} to {save_path}...')
-tokenizer = DistilBertTokenizer.from_pretrained(model_id)
-model = DistilBertForSequenceClassification.from_pretrained(model_id)
+try:
+    tokenizer = DistilBertTokenizer.from_pretrained(model_id)
+except Exception as e:
+    print(f'Warning: Could not download tokenizer from {model_id}. Falling back to base tokenizer. Error: {e}')
+    tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+
+try:
+    model = DistilBertForSequenceClassification.from_pretrained(model_id)
+except Exception as e:
+    print(f'\nCRITICAL ERROR: Failed to download model from Hugging Face ({model_id}).')
+    print('1. Did you spell the HF_MODEL_ID exactly right?')
+    print('2. If the repository is PRIVATE, you MUST add an HF_TOKEN variable in Railway Settings!')
+    print(f'Detailed Error: {e}\n')
+    exit(1)
 tokenizer.save_pretrained(save_path)
 model.save_pretrained(save_path)
 print('Download complete.')
