@@ -403,7 +403,10 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('API Error');
+                if (!response.ok) {
+                    if (response.status === 429) throw new Error("Rate limit exceeded. Please wait a moment.");
+                    throw new Error(`API Error: ${response.status}`);
+                }
 
                 const data = await response.json();
                 
@@ -434,6 +437,11 @@
 
             } catch (error) {
                 console.error("Inference failed:", error);
+                results.classList.add('active');
+                sentimentCard.style.setProperty('--current-color', 'var(--text-secondary)');
+                sentimentCard.style.setProperty('--current-glow', 'transparent');
+                sentimentLabel.textContent = "Error";
+                confidenceText.textContent = error.message;
             } finally {
                 status.classList.remove('visible');
             }

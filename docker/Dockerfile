@@ -45,4 +45,4 @@ ENV PORT=8000 \
     MODEL_PATH=/app/models/distilbert-sentiment \
     LOG_LEVEL=INFO
 
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --proxy-headers --forwarded-allow-ips '*'
