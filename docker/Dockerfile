@@ -50,6 +50,8 @@ RUN bash scripts/download_model.sh hf
 
 ENV PORT=8000 \
     MODEL_PATH=/app/models/distilbert-sentiment \
-    LOG_LEVEL=INFO
+    LOG_LEVEL=INFO \
+    OMP_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1
 
 CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --proxy-headers --forwarded-allow-ips '*'

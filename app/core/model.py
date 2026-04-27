@@ -58,7 +58,9 @@ def load_model(model_path: str, version_tag: str = "v1") -> ModelBundle:
 
     try:
         tokenizer = DistilBertTokenizer.from_pretrained(model_path)
-        model = DistilBertForSequenceClassification.from_pretrained(model_path)
+        model = DistilBertForSequenceClassification.from_pretrained(
+            model_path, low_cpu_mem_usage=True
+        )
         model.to(device)
         model.eval()
     except Exception as e:
