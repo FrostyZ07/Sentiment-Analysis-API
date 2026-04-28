@@ -1,0 +1,12 @@
+# Force LF line endings for all text files in the repo
+# This prevents CRLF issues when running linters in CI (Linux)
+* text=auto eol=lf
+
+# Explicitly mark binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.safetensors binary
+*.bin binary
