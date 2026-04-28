@@ -1,4 +1,5 @@
 """Pydantic request schemas."""
+
 from pydantic import BaseModel, Field, field_validator
 
 

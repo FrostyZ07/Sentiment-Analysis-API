@@ -16,19 +16,20 @@ from transformers import DistilBertForSequenceClassification, DistilBertTokenize
 import os
 
 model_id = os.environ.get('HF_MODEL_ID', 'FrostyZ07/distilbert-sentiment-amazon')
+subfolder = os.environ.get('HF_SUBFOLDER', 'distilbert-sentiment')
 save_path = os.environ.get('MODEL_PATH', './models/distilbert-sentiment')
 
-print(f'Downloading {model_id} to {save_path}...')
+print(f'Downloading {model_id} (subfolder={subfolder}) to {save_path}...')
 try:
-    tokenizer = DistilBertTokenizer.from_pretrained(model_id)
+    tokenizer = DistilBertTokenizer.from_pretrained(model_id, subfolder=subfolder)
 except Exception as e:
-    print(f'Warning: Could not download tokenizer from {model_id}. Falling back to base tokenizer. Error: {e}')
+    print(f'Warning: Could not download tokenizer from {model_id}/{subfolder}. Falling back to base tokenizer. Error: {e}')
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
 try:
-    model = DistilBertForSequenceClassification.from_pretrained(model_id)
+    model = DistilBertForSequenceClassification.from_pretrained(model_id, subfolder=subfolder)
 except Exception as e:
-    print(f'\nCRITICAL ERROR: Failed to download model from Hugging Face ({model_id}).')
+    print(f'\nCRITICAL ERROR: Failed to download model from Hugging Face ({model_id}/{subfolder}).')
     print('1. Did you spell the HF_MODEL_ID exactly right?')
     print('2. If the repository is PRIVATE, you MUST add an HF_TOKEN variable in Railway Settings!')
     print(f'Detailed Error: {e}\n')

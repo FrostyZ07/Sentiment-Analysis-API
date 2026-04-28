@@ -1,4 +1,5 @@
 """Shared test fixtures with mocked model — no GPU required."""
+
 from contextlib import asynccontextmanager
 from unittest.mock import MagicMock
 

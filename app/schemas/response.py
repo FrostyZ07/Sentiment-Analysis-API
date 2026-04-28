@@ -1,4 +1,5 @@
 """Pydantic response schemas."""
+
 from pydantic import BaseModel, Field
 
 
@@ -7,15 +8,11 @@ class PredictResponse(BaseModel):
 
     sentiment: str = Field(..., description="Predicted sentiment label.")
     label_id: int = Field(..., description="Numeric label ID.")
-    confidence: float = Field(
-        ..., ge=0.0, le=1.0, description="Max class probability."
-    )
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Max class probability.")
     probabilities: dict[str, float] | None = Field(
         default=None, description="Per-class probabilities (only if requested)."
     )
-    processing_time_ms: float = Field(
-        ..., description="Total inference time in ms."
-    )
+    processing_time_ms: float = Field(..., description="Total inference time in ms.")
     model_version: str = Field(..., description="Model version used.")
 
     model_config = {

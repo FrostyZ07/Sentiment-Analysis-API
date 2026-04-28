@@ -38,9 +38,7 @@ def test_batch_422_more_than_32_items(client):
 
 
 def test_batch_422_item_too_short(client):
-    response = client.post(
-        "/api/v1/batch", json={"texts": ["ok", "great product"]}
-    )
+    response = client.post("/api/v1/batch", json={"texts": ["ok", "great product"]})
     assert response.status_code == 422
 
 

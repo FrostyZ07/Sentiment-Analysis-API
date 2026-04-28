@@ -1,4 +1,5 @@
 """Batch prediction endpoint."""
+
 import time
 
 from fastapi import APIRouter, HTTPException, Request

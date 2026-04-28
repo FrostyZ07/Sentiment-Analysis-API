@@ -17,9 +17,11 @@ line_length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+exclude = [".venv", "notebooks"]
+
+[tool.ruff.lint]
 select = ["E", "W", "F", "I"]
 ignore = ["E501"]
-exclude = [".venv", "notebooks"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

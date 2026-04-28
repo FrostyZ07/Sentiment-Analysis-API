@@ -1,4 +1,5 @@
 """Prometheus metrics — isolated module to avoid circular imports."""
+
 try:
     from prometheus_client import Counter, Histogram
 

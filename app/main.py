@@ -1,5 +1,5 @@
 """FastAPI application factory with lifespan management."""
-import logging
+
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -50,9 +50,7 @@ async def lifespan(app: FastAPI):
     app.state.bundle_v2 = None
     if settings.model_path_v2:
         try:
-            app.state.bundle_v2 = load_model(
-                settings.model_path_v2, version_tag="v2"
-            )
+            app.state.bundle_v2 = load_model(settings.model_path_v2, version_tag="v2")
             logger.info("startup.model_loaded", version="v2")
         except RuntimeError as e:
             logger.warning("startup.v2_load_failed", error=str(e))
@@ -160,9 +158,7 @@ def create_app() -> FastAPI:
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
         request_id = getattr(request.state, "request_id", "unknown")
-        logger.error(
-            "unhandled_exception", error=str(exc), request_id=request_id
-        )
+        logger.error("unhandled_exception", error=str(exc), request_id=request_id)
         return JSONResponse(
             status_code=500,
             content={
@@ -191,9 +187,9 @@ def create_app() -> FastAPI:
     app.include_router(keys.router, prefix="/api/v1", tags=["Authentication"])
 
     # ── Static UI ─────────────────────────────────────────────────────
-    from fastapi.staticfiles import StaticFiles
     from fastapi.responses import FileResponse
-    
+    from fastapi.staticfiles import StaticFiles
+
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
     @app.get("/", include_in_schema=False)

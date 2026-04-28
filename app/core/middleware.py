@@ -1,4 +1,5 @@
 """API key authentication and tiered rate limiting."""
+
 import hashlib
 
 from fastapi import HTTPException, Request

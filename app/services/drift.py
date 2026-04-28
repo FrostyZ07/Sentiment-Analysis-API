@@ -1,4 +1,5 @@
 """Input drift detection using Evidently AI."""
+
 import json
 import logging
 import sqlite3
@@ -16,8 +17,7 @@ def init_db():
     """Initialize SQLite database for request logging."""
     Path(DB_PATH).parent.mkdir(exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS request_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
@@ -26,8 +26,7 @@ def init_db():
             predicted_label TEXT,
             confidence REAL
         )
-    """
-    )
+    """)
     conn.commit()
     conn.close()
 
@@ -50,13 +49,11 @@ def log_request(text: str, sentiment: str, confidence: float):
         ),
     )
     # Trim to MAX_LOG_SIZE
-    conn.execute(
-        f"""
+    conn.execute(f"""
         DELETE FROM request_log WHERE id NOT IN (
             SELECT id FROM request_log ORDER BY id DESC LIMIT {MAX_LOG_SIZE}
         )
-    """
-    )
+    """)
     conn.commit()
     conn.close()
 
@@ -78,9 +75,7 @@ def run_drift_check(reference_stats_path: str = "./data/training_stats.json"):
         conn.close()
 
         if len(current_df) < 100:
-            logger.info(
-                "drift.skip: insufficient data, count=%d", len(current_df)
-            )
+            logger.info("drift.skip: insufficient data, count=%d", len(current_df))
             return
 
         with open(reference_stats_path) as f:
@@ -95,20 +90,14 @@ def run_drift_check(reference_stats_path: str = "./data/training_stats.json"):
         )
 
         REPORTS_DIR.mkdir(exist_ok=True)
-        report_path = (
-            REPORTS_DIR / f"drift_{datetime.utcnow().strftime('%Y%m%d')}.html"
-        )
+        report_path = REPORTS_DIR / f"drift_{datetime.utcnow().strftime('%Y%m%d')}.html"
         report.save_html(str(report_path))
 
-        drift_detected = report.as_dict()["metrics"][0]["result"][
-            "dataset_drift"
-        ]
+        drift_detected = report.as_dict()["metrics"][0]["result"]["dataset_drift"]
         if drift_detected:
             logger.warning("drift.detected, report_path=%s", str(report_path))
         else:
-            logger.info(
-                "drift.none_detected, report_path=%s", str(report_path)
-            )
+            logger.info("drift.none_detected, report_path=%s", str(report_path))
 
     except ImportError:
         logger.warning("drift.skip: evidently not installed")

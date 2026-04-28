@@ -1,4 +1,5 @@
 """Model loading and management."""
+
 import logging
 import time
 from dataclasses import dataclass
@@ -47,9 +48,7 @@ def load_model(model_path: str, version_tag: str = "v1") -> ModelBundle:
     # Validate local path exists
     path = Path(model_path)
     if path.exists() and not path.is_dir():
-        raise RuntimeError(
-            f"MODEL_PATH '{model_path}' exists but is not a directory."
-        )
+        raise RuntimeError(f"MODEL_PATH '{model_path}' exists but is not a directory.")
     if path.exists() and not (path / "config.json").exists():
         raise RuntimeError(
             f"No config.json found in '{model_path}'. "
@@ -64,9 +63,7 @@ def load_model(model_path: str, version_tag: str = "v1") -> ModelBundle:
         model.to(device)
         model.eval()
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to load model from '{model_path}': {e}"
-        ) from e
+        raise RuntimeError(f"Failed to load model from '{model_path}': {e}") from e
 
     elapsed = time.perf_counter() - start
     labels = {int(k): v for k, v in model.config.id2label.items()}

@@ -1,4 +1,5 @@
 """Async batch job endpoints for large-scale prediction."""
+
 import json
 import sqlite3
 import uuid
@@ -18,8 +19,7 @@ def init_jobs_db():
     """Initialize the jobs SQLite database."""
     Path(DB_PATH).parent.mkdir(exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
             id TEXT PRIMARY KEY,
             status TEXT,
@@ -28,8 +28,7 @@ def init_jobs_db():
             total INTEGER,
             results TEXT
         )
-    """
-    )
+    """)
     conn.commit()
     conn.close()
 
@@ -60,9 +59,7 @@ async def submit_batch_job(
 
     async def process_job():
         conn = sqlite3.connect(DB_PATH)
-        conn.execute(
-            "UPDATE jobs SET status='processing' WHERE id=?", (job_id,)
-        )
+        conn.execute("UPDATE jobs SET status='processing' WHERE id=?", (job_id,))
         conn.commit()
         try:
             results = predict_batch(body.texts, bundle)
@@ -91,8 +88,7 @@ async def submit_batch_job(
 async def get_job_status(job_id: str):
     conn = sqlite3.connect(DB_PATH)
     row = conn.execute(
-        "SELECT id, status, created_at, completed_at, total "
-        "FROM jobs WHERE id=?",
+        "SELECT id, status, created_at, completed_at, total " "FROM jobs WHERE id=?",
         (job_id,),
     ).fetchone()
     conn.close()

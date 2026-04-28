@@ -1,4 +1,5 @@
 """Single prediction and model info endpoints."""
+
 import random
 from datetime import datetime, timezone
 
@@ -34,9 +35,7 @@ def get_bundle(request: Request, version: str = "v1"):
                 "error": {
                     "code": "MODEL_NOT_READY",
                     "message": "Model is not loaded yet.",
-                    "request_id": getattr(
-                        request.state, "request_id", "unknown"
-                    ),
+                    "request_id": getattr(request.state, "request_id", "unknown"),
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             },
